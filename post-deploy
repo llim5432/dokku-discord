@@ -18,16 +18,7 @@ if [[ -f "$DOKKU_ROOT/$APP/DISCORD_URL" || -f "$DOKKU_ROOT/DISCORD_URL" || "$DIS
   DEPLOYING_USER="$(cat "$DOKKU_ROOT/$APP/.commit_author" 2>/dev/null || true)"
   [[ -n "$DEPLOYING_USER" ]] && MESSAGE_TEXT="$DEPLOYING_USER:"$'\n'"$MESSAGE_TEXT"
 
-  DISCORD_JSON="{ \
-      \"embeds\": \
-      [ \
-        { \
-          \"description\": \"$MESSAGE_TEXT\", 
-          \"color\": 2407256, \
-          \"timestamp\": \"$TIMESTAMP\" \
-        } \
-    ] \
-  }"
+  DISCORD_JSON="{\"embeds\":[{\"description\":\"$MESSAGE_TEXT\",\"color\":2407256,\"timestamp\":\"$TIMESTAMP\"}]}"
   
   DISCORD_RESULT=$(curl -X POST --data "$DISCORD_JSON" -H "Content-Type: application/json" "${DISCORD_URL}" -w "%{http_code}")
   echo "       ${DISCORD_RESULT}"
