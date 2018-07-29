@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+# git specific implementation
+get_latest_commit_user_from_git() {
+  local APP="$1"; local REV="$2"
+
+  pushd "$DOKKU_ROOT/$APP" > /dev/null
+  COMMIT_AUTHOR=$(git log -n1 "$REV" --pretty="%an <%ae> (%h)" || true)
+  [[ -n "$COMMIT_AUTHOR" ]] && echo "$COMMIT_AUTHOR"
+}
+
+# example for bzr
+get_latest_commit_user_from_bzr() {
+  local APP="$1"
+
+  pushd "$DOKKU_ROOT/$APP" > /dev/null
+  LATEST_BZR_LOG=$(bzr log -l 1 | grep committer || true)
+  [[ -n "$LATEST_BZR_LOG" ]] && COMMIT_AUTHOR=$(echo "$LATEST_BZR_LOG" | sed -r -n "s/committer: (.*)/\1/p" || true)
+  [[ -n "$COMMIT_AUTHOR" ]] && echo "$COMMIT_AUTHOR"
+}
+
+# wrapper function to be extended to other VCS
+get_commit_author_by_rev() {
+  local APP="$1"; local REV="$2"
+
+  pushd "$DOKKU_ROOT/$APP" > /dev/null
+  if (git log -1 &> /dev/null); then
+    get_latest_commit_user_from_git "$APP" "$REV"
+  elif (bzr log -l 1 &> /dev/null); then
+    get_latest_commit_user_from_bzr "$APP"
+  else
+    echo "$USER"
+  fi
+}

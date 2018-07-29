@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$(dirname "$0")/functions"
+
+APP="$1"
+IMAGE="$2"
+HOSTNAME=$(hostname -f)
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+[[ -f "$DOKKU_ROOT/$APP/ENV" ]] && source "$DOKKU_ROOT/$APP/ENV" # allows us to read in DISCORD_* if we define it in the app env
+
+if [[ -f "$DOKKU_ROOT/$APP/DISCORD_URL" || -f "$DOKKU_ROOT/DISCORD_URL" || "$DISCORD_NOTIFY" == "1" ]]; then
+  echo "-----> Notifying Discord ..."
+  URL=$(dokku url "$APP")
+  DISCORD_URL=$(cat "$DOKKU_ROOT/$APP/DISCORD_URL" 2> /dev/null || cat "$DOKKU_ROOT/DISCORD_URL" 2> /dev/null)
+
+  MESSAGE_TEXT="deployed $APP to $HOSTNAME via $URL"
+  DEPLOYING_USER="$(cat "$DOKKU_ROOT/$APP/.commit_author" 2>/dev/null || true)"
+  [[ -n "$DEPLOYING_USER" ]] && MESSAGE_TEXT="$DEPLOYING_USER:"$'\n'"$MESSAGE_TEXT"
+
+  DISCORD_JSON="{ \
+      \"embed\": { \
+      \"description\": \"$MESSAGE_TEXT\", 
+      \"color\": 2407256, \
+      \"timestamp\": \"$TIMESTAMP\" \
+    } \
+  }"
+  DISCORD_RESULT=$(curl -s -d "payload=$DISCORD_JSON" "${DISCORD_URL}" -w "%{http_code}")
+  echo "       ${DISCORD_RESULT}"
+fi

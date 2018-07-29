@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$(dirname "$0")/functions"
+
+APP="$1"
+APP_IMAGE_TYPE="$2"
+TMP_WORK_DIR="$3"
+REV="$4"
+
+COMMIT_AUTHOR=$(get_commit_author_by_rev "$APP" "$REV")
+[[ -n "$COMMIT_AUTHOR" ]] && echo "$COMMIT_AUTHOR" > "$DOKKU_ROOT/$APP/.commit_author"
