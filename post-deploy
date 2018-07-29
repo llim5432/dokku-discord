@@ -29,6 +29,6 @@ if [[ -f "$DOKKU_ROOT/$APP/DISCORD_URL" || -f "$DOKKU_ROOT/DISCORD_URL" || "$DIS
     ] \
   }"
   
-  DISCORD_RESULT=$(curl -s -d "$DISCORD_JSON" "${DISCORD_URL}" -w "%{http_code}")
+  DISCORD_RESULT=$(curl -X POST --data "$DISCORD_JSON" -H "Content-Type: application/json" "${DISCORD_URL}" -w "%{http_code}")
   echo "       ${DISCORD_RESULT}"
 fi
