@@ -6,7 +6,7 @@ Dokku Discord is a plugin for [Dokku](https://github.com/dokku/dokku) that notif
 
 ```sh
 # dokku 0.4+
-$ dokku plugin:install https://github.com/Dynamictivity/dokku-discord.git
+$ dokku plugin:install https://github.com/llim5432/dokku-discord.git
 ```
 
 ## Commands
